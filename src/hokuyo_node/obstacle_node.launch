@@ -1,0 +1,3 @@
+<launch>
+<node name="obstaclenode" pkg="obstacle_node" type="obstacle_node" output="screen" />
+</launch>
