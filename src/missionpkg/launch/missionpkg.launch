@@ -28,22 +28,27 @@
     <param name="image_width" value="640" />
     <param name="image_height" value="480" />
     <param name="pixel_format" value="yuyv" />
+    <param name="framerate" value="10" />
     <param name="camera_frame_id" value="usb_cam" />
     <param name="io_method" value="mmap"/>
   </node>
-  
-  <node name="usb_cam2" pkg="usb_cam" type="usb_cam_node" output="screen" >
+
+  <node name="usb_cam1" pkg="usb_cam" type="usb_cam_node" output="screen" >
     <param name="video_device" value="/dev/video1" />
     <param name="image_width" value="640" />
     <param name="image_height" value="480" />
     <param name="pixel_format" value="yuyv" />
-    <param name="camera_frame_id" value="usb_cam" />
+    <param name="framerate" value="10" />
+    <param name="camera_frame_id" value="usb_cam1" />
     <param name="io_method" value="mmap"/>
   </node>
 
-  <node name="ellipse_detection" pkg="missionpkg" type="el_det_fi.py" />
+
+  <node name="vid" pkg="missionpkg" type="hsv_ros.py" />
 
   <node name="offboard2" pkg="missionpkg" type="offboard2" output="screen" />
+  <include file="$(find hokuyo_node)/hokuyo_test.launch"/>
+  <include file="$(find obstacle_node)/launch/obstacle_node.launch"/>
 
   <!--node name="offboard1" pkg="missionpkg" type="offb1.cpp" output="screen">
     <param name="wn" value="0.2" />
