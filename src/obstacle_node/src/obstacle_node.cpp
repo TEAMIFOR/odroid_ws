@@ -8,7 +8,7 @@ void scanValues(const sensor_msgs::LaserScan laser)
     //fprintf(stderr,"\n -------- size[%d] ---------- ", (int)laser.ranges.size());
     
     float m = 100;
-    float thresh = 0.25;
+    float thresh = 1.20;
     int ang = -1;
 
     for (unsigned int i=0; i<laser.ranges.size();i++)
