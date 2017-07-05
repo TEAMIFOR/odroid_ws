@@ -1,7 +1,8 @@
 # not odroid_ws
-ros simulation scripts for iarc mission using iris with optical flow, lpe and px4 flight stack.
+ros simulation scripts for iarc mission7 using iris with optical flow, lpe and px4 flight stack.
 
 ## Setup Intructions 
+PART A: Setup px4 flight stack and sim env
 ```
 git clone https://github.com/px4/Firmware.git
 cd Firmware
@@ -17,6 +18,13 @@ source Tools/setup_gazebo.bash $(pwd) $(pwd)/build_posix_sitl_lpe
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)/Tools/sitl_gazebo
 roslaunch px4 mavros_posix_sitl.launch
+```
+PART B: Setup your workspace
+```
+git clone https://github.com/TEAMIFOR/odroid_ws.git
+cd odroid_ws
+chmod 755 launcher.sh
+. ./launcher.sh
 ```
 
 ## Changelog
