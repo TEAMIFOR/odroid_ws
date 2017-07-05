@@ -4,6 +4,3 @@
 [submodule "src/image_common"]
 	path = src/image_common
 	url = https://github.com/ros-perception/image_common
-[submodule "src/usb_cam"]
-	path = src/usb_cam
-	url = https://github.com/ros-drivers/usb_cam
