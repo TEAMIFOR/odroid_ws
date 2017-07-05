@@ -24,7 +24,7 @@ v4 object detection and following scripts added
 ```
 
 ## Notes
-```
-the gazebo camera plugin which is edited into iris_opt_flow.sdf publishes a ros node, check topic names here ( replaces usb_cam node during simulation runs)
+1. The gazebo camera plugin which is edited into iris_opt_flow.sdf publishes a ros node, check topic names here ( replaces usb_cam node during simulation runs)
+2. we launch px4 flight stack and sim env with mavros as in mavros_posix_sitl.launch which has been edited according to our requirements 
+3. for ellipse detection specialised values have been used for thresh, lower major, lower minor axis and etc which suit best in sim env
 
-```
