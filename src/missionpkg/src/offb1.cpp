@@ -137,8 +137,9 @@ int main(int argc, char **argv)
         pose.pose.position.z = 1.75f;
         count++;
         if (!isTargetPos())
+        {
             movetopos();
-
+        }
       
     }
 
