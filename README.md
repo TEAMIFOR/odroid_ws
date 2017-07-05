@@ -8,10 +8,10 @@ cd Firmware
 make posix_sitl_lpe gazebo_iris_opt_flow 
 ```
 Editing necessary files
-Replace Firmware/launch/mavros_posix_sitl.launch (spawing iris_opt_flow)
-Replace Firmware/Tools/sitl_gazebo/models/iris_opt_flow/iris_opt_flow.sdf (attach camera and define rostpoics usbcam substitute)
-Replace Firmware/Tools/sitl_gazebo/worlds/empty.world
-Replace Firmware/posix-confings/SITL/init/lpe/iris_opt_fow (custom tweaked params, reduce some errors)
+1. Replace Firmware/launch/mavros_posix_sitl.launch (spawing iris_opt_flow)
+2. Replace Firmware/Tools/sitl_gazebo/models/iris_opt_flow/iris_opt_flow.sdf (attach camera and define rostpoics usbcam substitute)
+3. Replace Firmware/Tools/sitl_gazebo/worlds/empty.world
+4. Replace Firmware/posix-confings/SITL/init/lpe/iris_opt_fow (custom tweaked params, reduce some errors)
 ```
 source Tools/setup_gazebo.bash $(pwd) $(pwd)/build_posix_sitl_lpe
 export ROS_PACKAGE_PATH=$ROS_PACKAGE_PATH:$(pwd)
