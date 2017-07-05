@@ -33,7 +33,6 @@ catkin_install_python(PROGRAMS src/el_det_fi.py
 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-add_executable(offboard1 src/offb1.cpp)
-target_link_libraries(offboard1 ${catkin_LIBRARIES})
-add_executable(offboard2 src/offb2.cpp)
-target_link_libraries(offboard2 ${catkin_LIBRARIES})
+add_executable(objdetnfollow src/objdetnfollow.cpp)
+target_link_libraries(objdetnfollow ${catkin_LIBRARIES})
+
