@@ -1,3 +1,40 @@
+/* let me tell you a story,
+ben is a drone, ben is a crazy child, whenever he takesoff he starts 
+flying off in random directions unless we control him using offboard
+mode, now the problem is for ben to remain stable in offboard mode u
+need to keep feeding it setpoints constantly with a max gap of 0.5s, 
+ie 50hz. This explains the reason why we are keeping the setpointpos 
+publishers under nested while loops. Now we need a have a smooth 
+transition from takeoff_n_survey to ellipse_not_found_n_survey becuz
+as mentioned earlier ben will go out of control if you stop sending 
+setpoints even for a short period of time. 
+
+Ben's daily routine starts by taking off and surveying in a circle, 
+looking for ground robots as soon as he see the GB he exits from the
+takeoff_n_survey while loop, and transitions to another while loop 
+which has many nested loops whith different conditions. So the sub
+scriber which receives data from ellipse detection node tells ben if
+ellipse has been found or not. Currently when the ellipse has been 
+found it stays inside the ellipseFound loop till the img processing 
+node tells him no more ellipses. Then ben still staying inside the 
+master while loop transitions to another while loop where there is 
+ellipseNotFound flag checking.
+
+The pixel coordinates of the midpoints of ellipses from ell_det.py
+is divided into four quadrants. In this system ben is in the middle
+and based on which quadrant the ellipse mid is in it increments/dec
+reents its x and y coordinates by a small amount. this data is publ
+ished. 
+
+A hovering phase has been established which works by streaming the 
+last known position constantly, this is important when no ellipses 
+are found, [TODO: tell ben to survey the remaining portion] in this 
+loop. Hovering phase is essential as switching to auto.loiter caused
+problems to ben and i needed a way to make it stay at the same 
+position for some time to do the selection and still send setpoints
+(refer ben's problems para1).
+*/
+
 #include <ros/ros.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <mavros_msgs/CommandBool.h>
@@ -35,13 +72,21 @@ void cbLocalPosition(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     localPose_ = *msg;
 }
+/* This is the master brain which takes input from image processing node
+and tells ben if an ellipse has been found or not. Further it also sends 
+coordinates for ben to move in order to acheive object following 
+The 800x800 pixelcordinate frame is divided into 4 quadrants of 400x400
+pixels and each quadrant increments/ decrements ben's coordinates acc.
+TODO: The quadrant implementation needs to be revoked as ben's cameras 
+will be tilted. Good sugesstions: Gradient map 
+*/
 void genTargets(const geometry_msgs::Vector3 &vector3)
 {
     geometry_msgs::Vector3 vec;
     vec.x = vector3.x;
     vec.y = vector3.y;
     vec.z = vector3.z;
-    if( vec.x==0 && vec.y==0 && vec.z==0 ) //distance_calulation gotta do its duty
+    if( vec.x==0 && vec.y==0 && vec.z==0 ) // distance_calulation gotta do its duty
     {
       ellFound = 0;
 
@@ -68,7 +113,7 @@ void genTargets(const geometry_msgs::Vector3 &vector3)
           pose.pose.position.y = localPose_.pose.position.y  - 0.09f;
           pose.pose.position.z = 2.00f ;
 
-        }else{
+        }else{ // this shouldnt occur but added just in case for dev purposes
           printf("impossible event occured: %f, %f, %f\n", vec.x, vec.y, vec.z );
         }
     }
@@ -92,8 +137,7 @@ int movetopos()
     arm_cmd.request.value = true;
     ros::Time last_request = ros::Time::now();
 
-
-    while(ros::ok()) //for(int i=0;i<54;i++)
+    while(ros::ok()) 
     {
       if( current_state.mode != "OFFBOARD" && (ros::Time::now() - last_request > ros::Duration(5.0)))
       {
@@ -114,8 +158,6 @@ int movetopos()
           last_request = ros::Time::now();
         }
       }
-
-
       if (isTargetPos())
       {
         return 0;
@@ -125,7 +167,6 @@ int movetopos()
         local_pos_pub.publish(pose);
         std::this_thread::sleep_for(std::chrono::milliseconds(100));
       }
-
     }
 }
 
@@ -164,35 +205,38 @@ int main(int argc, char **argv)
         ros::spinOnce();
         rate.sleep();
     }
+    // this is formal mandatory steps to safely go into offb mode
     pose.pose.position.x = 0;
     pose.pose.position.y = 0;
     pose.pose.position.z = 2;
-    //send a few setpoints before starting
     for(int i = 10; ros::ok() && i > 0; --i){
         local_pos_pub.publish(pose);
         ros::spinOnce();
         rate.sleep();
     }
 
-
-    //startup, intially takeoffs and surveys
+    /*ben takes off and goes into intial surveillance mode, stays
+    here till a GB has been found and then transitions smoothly to
+    next while loop */    
     while(ros::ok() && !ellFound ) //ellipse found by first instance, 
     {
         theta = 0.2*count*0.001;
         pose.pose.position.x = 3*sin(theta);
         pose.pose.position.y = 3*cos(theta);
         pose.pose.position.z = 2.00f;
-        hoverPose_.pose.position.x = localPose_.pose.position.x;
-        hoverPose_.pose.position.y = localPose_.pose.position.y;
-        hoverPose_.pose.position.z = localPose_.pose.position.z;
+        hoverPose_.pose.position.x = localPose_.pose.position.x; // these help in hoverPhase
+        hoverPose_.pose.position.y = localPose_.pose.position.y; // they are like lastknowloc
+        hoverPose_.pose.position.z = localPose_.pose.position.z; 
         count++;
         if (!isTargetPos())
         {
-          //printf("x: %f  y: %f  z: %f\n", pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
           movetopos();
         }
     }
-    printf("startup finish\n");
+    /* This while loop should never be exited unless mission has ended as
+    ben will start behaving abnormally. Further it should contain nexted 
+    while loops for different scenarios like GBs_found_selecting, 
+    GB_selected_following, GB_landing, GBs_not_found_surverying .. etc  */
     while(ros::ok())
     {
       while(ros::ok() && !ellFound ) //survey to find next groundbot
@@ -202,7 +246,6 @@ int main(int argc, char **argv)
           mavros_msgs::CommandBool arm_cmd;
           arm_cmd.request.value = true;
           ros::Time last_request = ros::Time::now();
-
           for(int i=0;i<54;i++)
           {
             if( current_state.mode != "OFFBOARD" && (ros::Time::now() - last_request > ros::Duration(5.0)))
@@ -228,7 +271,9 @@ int main(int argc, char **argv)
               std::this_thread::sleep_for(std::chrono::milliseconds(100));
           }
       }
-      while(ros::ok() && ellFound ) //this is da reeell place were shit goes down
+     /* This is where ben follows the GB that has been bound
+     TODO: follow until flag land_in_front_of_gb has been set */
+      while(ros::ok() && ellFound ) //this is da reeell place 
       {
           mavros_msgs::SetMode offb_set_mode;
           offb_set_mode.request.custom_mode = "OFFBOARD";
@@ -267,7 +312,5 @@ int main(int argc, char **argv)
           }
       }
     }
-
-
     return 0;
 }
