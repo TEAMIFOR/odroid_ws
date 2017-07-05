@@ -6,6 +6,8 @@ cd odroid_ws
 chmod 755 launcher.sh
 . ./launcher.sh
 ```
+Sole prurpose of this repo is to act as primary package for the odroid system as to complete the mission. So please keep the master branch clean, for adding new features and scripts which are imcompatible (ie, scripts without ros implementation, scripts with harcoded values, scripts to test stuff) commit to a new branch and submit a pull request. In case the developer missed any important points or harcoded some values, then it can be fixed in the pull request and pull request can be accepted to add features to master branch.
+TODO: necessary cleanup required
 
 ## Changelog
 ```
